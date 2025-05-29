@@ -1,0 +1,10 @@
+# docker-compose.yml
+version: '4.2'
+
+services:
+  mcp-server:
+    image: demomcp:latest       # ← use the tag we’ll build below
+    ports:
+      - "8000:80"
+    environment:
+      - OPENWEATHER_API_KEY=${OPENWEATHER_API_KEY}

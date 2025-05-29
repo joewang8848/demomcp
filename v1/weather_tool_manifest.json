@@ -1,0 +1,28 @@
+{
+  "name": "get_current_weather",
+  "description": "Fetches current weather data for a given city or geographic coordinates.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "location": {
+        "type": "string",
+        "description": "City name, e.g. 'Sydney,AU', or '1600 Amphitheatre Parkway, CA'."
+      },
+      "units": {
+        "type": "string",
+        "enum": ["metric", "imperial"],
+        "default": "metric",
+        "description": "Units for temperature."
+      }
+    },
+    "required": ["location"]
+  },
+  "returns": {
+    "type": "object",
+    "properties": {
+      "temperature": { "type": "number" },
+      "description":  { "type": "string" },
+      "humidity":     { "type": "number" }
+    }
+  }
+}
