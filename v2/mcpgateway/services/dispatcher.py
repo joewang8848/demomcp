@@ -1,5 +1,5 @@
-# services/dispatcher.py - Request Router
-from typing import Dict, Any
+# services/dispatcher.py - Request Router (Fixed)
+from typing import Dict, Any, Optional
 from tools.remote_tool import RemoteTool
 from config import settings
 from models.mcp import MCPRequest, MCPResponse, MCPErrorResponse
@@ -7,7 +7,11 @@ from models.mcp import MCPRequest, MCPResponse, MCPErrorResponse
 # Build tool registry
 tools = {t.name: RemoteTool(t) for t in settings.tools}
 
-async def dispatch(req: MCPRequest) -> Dict[str, Any]:
+async def dispatch(req: MCPRequest) -> Optional[Dict[str, Any]]:
+    
+    # Handle notifications (no id = no response)
+    if req.id is None:
+        return None
     
     if req.method == "initialize":
         return MCPResponse(

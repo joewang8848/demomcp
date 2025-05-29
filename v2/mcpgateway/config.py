@@ -11,7 +11,7 @@ class ToolConfig(BaseModel):
 
 class ServerConfig(BaseModel):
     host: str = "0.0.0.0"
-    port: int = 8000
+    port: int = 8001
 
 class Settings(BaseModel):
     rpc_path: str = "/mcp"
