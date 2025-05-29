@@ -14,7 +14,7 @@ graph LR
     
     Client --> WeatherTool[All-in-One MCP Weather Tool]
     
-    subgraph External Services
+    subgraph ExternalServices[External Services]
         API[Weather API]
     end
     
@@ -26,7 +26,7 @@ graph LR
     style AI fill:#e1f5fe,stroke:#333,stroke-width:2px
     style Web fill:#e1f5fe,stroke:#333,stroke-width:2px
     style API fill:#f3e5f5,stroke:#333,stroke-width:2px
-    style "External Services" fill:#f3e5f5,stroke:#333,stroke-width:2px
+    style ExternalServices fill:#f3e5f5,stroke:#333,stroke-width:2px
 ```
 
 ### V2 Architecture (Modular MCP Gateway)
@@ -41,7 +41,7 @@ graph LR
     
     Client --> MCPGateway[MCP Gateway]
     
-    subgraph "MCP Gateway Components"
+    subgraph MCPGatewayComponents[MCP Gateway Components]
         MCPGateway --> Config[Configuration]
         MCPGateway --> Logger[Logger]
         MCPGateway --> Models[MCP Models]
@@ -54,7 +54,7 @@ graph LR
         WeatherTool[Weather Tool]
     end
     
-    subgraph "External Services"
+    subgraph ExternalServices[External Services]
         API[Weather API]
     end
     
@@ -72,8 +72,8 @@ graph LR
     style Logger fill:#ffcdd2,stroke:#333,stroke-width:2px
     style Models fill:#ffcdd2,stroke:#333,stroke-width:2px
     style Tools fill:#bbdefb,stroke:#333,stroke-width:2px
-    style "External Services" fill:#f3e5f5,stroke:#333,stroke-width:2px
-    style "MCP Gateway Components" fill:#bbdefb,stroke:#333,stroke-width:2px
+    style ExternalServices fill:#f3e5f5,stroke:#333,stroke-width:2px
+    style MCPGatewayComponents fill:#bbdefb,stroke:#333,stroke-width:2px
 ```
 
 ## Architecture Comparison
