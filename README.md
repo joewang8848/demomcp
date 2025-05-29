@@ -5,12 +5,20 @@
 ### V1 Architecture
 ```mermaid
 graph LR
-    Client[Client] --> WeatherTool[Weather Tool]
-    WeatherTool --> API[Weather API]
+    User[User] --> Client
+    
+    subgraph Client
+        AI[AI Assistants]
+        Web[Web Interface]
+    end
+    
+    Client --> WeatherTool[All-in-One Weather Tool]
     
     style Client fill:#f9f,stroke:#333,stroke-width:2px
     style WeatherTool fill:#bbf,stroke:#333,stroke-width:2px
-    style API fill:#ddf,stroke:#333,stroke-width:2px
+    style User fill:#f9f,stroke:#333,stroke-width:2px
+    style AI fill:#f9f,stroke:#333,stroke-width:2px
+    style Web fill:#f9f,stroke:#333,stroke-width:2px
 ```
 
 ### V2 Architecture
@@ -22,9 +30,8 @@ graph LR
         AI[AI Assistants]
         Web[Web Interface]
     end
-    
-    Client --> MCPGateway[MCP Gateway]
-    MCPGateway -.-> Tools
+      Client --> MCPGateway[MCP Gateway]
+    Dispatcher -.-> Tools
     
     subgraph Tools
         WeatherTool[Weather Tool]
