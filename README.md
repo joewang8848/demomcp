@@ -49,15 +49,20 @@ graph LR
         MCPGateway --> Models[MCP Models]
         MCPGateway --> Dispatcher[Dispatcher Service]
     end
-    
-    style Client fill:#f9f,stroke:#333,stroke-width:2px
+      style Client fill:#f9f,stroke:#333,stroke-width:2px
+    style User fill:#f9f,stroke:#333,stroke-width:2px
+    style AI fill:#f9f,stroke:#333,stroke-width:2px
+    style Web fill:#f9f,stroke:#333,stroke-width:2px
     style MCPGateway fill:#bbf,stroke:#333,stroke-width:2px
-    style Dispatcher fill:#bfb,stroke:#333,stroke-width:2px
+    style Dispatcher fill:#fbb,stroke:#333,stroke-width:2px
     style WeatherTool fill:#bbf,stroke:#333,stroke-width:2px
     style API fill:#ddf,stroke:#333,stroke-width:2px
     style Config fill:#fbb,stroke:#333,stroke-width:2px
     style Logger fill:#fbb,stroke:#333,stroke-width:2px
     style Models fill:#fbb,stroke:#333,stroke-width:2px
+    style Tools fill:#bbf,stroke:#333,stroke-width:2px
+    style External Services fill:#ddf,stroke:#333,stroke-width:2px
+    style MCP Gateway Components fill:#bbf,stroke:#333,stroke-width:2px
 ```
 
 ### Key Differences
