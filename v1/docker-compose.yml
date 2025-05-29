@@ -2,8 +2,9 @@
 version: '4.2'
 
 services:
-  mcp-server:
+  demomcp:
     image: demomcp:latest       # ← use the tag we’ll build below
+    container_name: demomcp
     ports:
       - "8000:8000"
     environment:
