@@ -1,4 +1,3 @@
-# config.yaml
 rpc_path: /mcp
 server:
   host: 0.0.0.0
@@ -10,17 +9,27 @@ tools:
     input_schema:
       type: object
       properties:
-        location: { type: string, description: City name }
-        units:     { type: string, enum: [metric,imperial], default: metric }
+        location: 
+          type: string
+          description: City name or location
+        units:
+          type: string
+          enum: [metric, imperial]
+          default: metric
+          description: Temperature units
       required: [location]
     endpoint: http://192.168.4.154:9001/v1/get_current_weather
-    
+
   - name: generate_sql_files
     description: Generate JIL and SQL files for a given stream ID and SQL content
     input_schema:
       type: object
       properties:
-        streamid: { type: string, description: Stream identifier }
-        sql_content: { type: string, description: Multi-line SQL content }
+        streamid: 
+          type: string
+          description: Stream identifier
+        sql_content: 
+          type: string
+          description: Multi-line SQL content
       required: [streamid, sql_content]
     endpoint: http://192.168.4.154:9002/v1/generate_sql_files
