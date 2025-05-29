@@ -1,4 +1,4 @@
-# main.py - MCP Gateway
+# main.py - MCP Gateway (Fixed)
 from fastapi import FastAPI, Request
 from models.mcp import MCPRequest
 from services.dispatcher import dispatch
@@ -13,7 +13,13 @@ app = FastAPI(title="MCP Gateway", version="2.0.0")
 async def mcp_endpoint(request: Request):
     body = await request.json()
     req = MCPRequest(**body)
-    return await dispatch(req)
+    result = await dispatch(req)
+    
+    # Return empty response for notifications (no id)
+    if result is None:
+        return {}
+    
+    return result
 
 @app.get("/health")
 async def health():

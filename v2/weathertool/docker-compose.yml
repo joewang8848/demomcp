@@ -1,0 +1,7 @@
+version: '3.8'
+services:
+  weather-tool:
+    image: weather-tool:latest
+    ports: ["9001:9001"]
+    env_file: .env
+    restart: unless-stopped

@@ -13,4 +13,4 @@ tools:
         location: { type: string, description: City name }
         units:     { type: string, enum: [metric,imperial], default: metric }
       required: [location]
-    endpoint: http://127.0.0.1:9001/mcp
+    endpoint: http://192.168.4.154:9001/v1/get_current_weather
