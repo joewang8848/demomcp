@@ -2,7 +2,7 @@
 rpc_path: /mcp
 server:
   host: 0.0.0.0
-  port: 8000
+  port: 8001
 
 tools:
   - name: get_current_weather
@@ -13,14 +13,4 @@ tools:
         location: { type: string, description: City name }
         units:     { type: string, enum: [metric,imperial], default: metric }
       required: [location]
-    endpoint: http://weather-tool:8000/mcp
-
-  - name: translate_text
-    description: Translate a piece of text
-    input_schema:
-      type: object
-      properties:
-        text:    { type: string }
-        target:  { type: string, description: ISO language code }
-      required: [text, target]
-    endpoint: http://translate-service:8001/mcp
+    endpoint: http://127.0.0.1:9001/mcp

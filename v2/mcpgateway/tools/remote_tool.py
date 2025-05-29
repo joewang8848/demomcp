@@ -1,31 +1,30 @@
-# tools/remote_tool.py
+# tools/remote_tool.py - HTTP Client
 import httpx
-from .base import BaseTool
-from models import MCPResponse, MCPErrorResponse
+from typing import Dict, Any, Union
 
-class RemoteTool(BaseTool):
+class RemoteTool:
     def __init__(self, config):
         self.name = config.name
         self.description = config.description
         self.input_schema = config.input_schema
-        self.url = config.endpoint
+        self.endpoint = config.endpoint
 
-    async def run(self, rpc_id, arguments) -> dict:
+    async def run(self, rpc_id: Union[int, str], arguments: Dict[str, Any]) -> Dict[str, Any]:
         payload = {
-            "jsonrpc": "2.0",
-            "id": rpc_id,
-            "method": "tools/call",
-            "params": {
-                "name": self.name,
-                "arguments": arguments
-            }
+            "tool_name": self.name,
+            "arguments": arguments,
+            "request_id": rpc_id
         }
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            resp = await client.post(self.url, json=payload)
-            resp.raise_for_status()
-            data = resp.json()
-
-        if "error" in data:
-            # map JSON-RPC error into your MCPErrorResponse if you like
-            raise Exception(data["error"]["message"])
-        return data["result"]
+        
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(self.endpoint, json=payload)
+            
+            if response.status_code != 200:
+                raise Exception(f"HTTP {response.status_code}")
+            
+            result = response.json()
+            
+            if isinstance(result, dict) and result.get("error"):
+                raise Exception(result["error"])
+            
+            return result

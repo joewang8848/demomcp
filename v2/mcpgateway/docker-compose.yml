@@ -1,0 +1,13 @@
+
+# docker-compose.yml - MCP Gateway v2
+version: '3.8'
+
+services:
+  mcp-gateway:
+    image: mcp-gateway-v2:latest
+    container_name: mcp-gateway-v2
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./config.yaml:/app/config.yaml
+    restart: unless-stopped
