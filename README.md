@@ -30,7 +30,8 @@ graph LR
         AI[AI Assistants]
         Web[Web Interface]
     end
-      Client --> MCPGateway[MCP Gateway]
+    
+    Client --> MCPGateway[MCP Gateway]
     Dispatcher -.-> Tools
     
     subgraph Tools
