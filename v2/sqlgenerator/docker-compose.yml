@@ -1,0 +1,7 @@
+# === docker-compose.yml ===
+version: '3.8'
+services:
+  sqlgen-tool:
+    image: sqlgen-tool:latest
+    ports: ["9002:9002"]
+    restart: unless-stopped
