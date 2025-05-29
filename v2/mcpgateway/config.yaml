@@ -1,0 +1,26 @@
+# config.yaml
+rpc_path: /mcp
+server:
+  host: 0.0.0.0
+  port: 8000
+
+tools:
+  - name: get_current_weather
+    description: Get the current weather for a location
+    input_schema:
+      type: object
+      properties:
+        location: { type: string, description: City name }
+        units:     { type: string, enum: [metric,imperial], default: metric }
+      required: [location]
+    endpoint: http://weather-tool:8000/mcp
+
+  - name: translate_text
+    description: Translate a piece of text
+    input_schema:
+      type: object
+      properties:
+        text:    { type: string }
+        target:  { type: string, description: ISO language code }
+      required: [text, target]
+    endpoint: http://translate-service:8001/mcp
