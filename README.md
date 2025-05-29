@@ -16,15 +16,31 @@ graph LR
 ### V2 Architecture
 ```mermaid
 graph LR
-    Client[Client] --> MCPGateway[MCP Gateway]
-    MCPGateway --> Dispatcher[Dispatcher Service]
-    Dispatcher --> WeatherTool[Weather Tool]
-    WeatherTool --> API[Weather API]
+    User[User] --> Client
+    
+    subgraph Client
+        AI[AI Assistants]
+        Web[Web Interface]
+    end
+    
+    Client --> MCPGateway[MCP Gateway]
+    MCPGateway -.-> Tools
+    
+    subgraph Tools
+        WeatherTool[Weather Tool]
+    end
+    
+    subgraph External Services
+        API[Weather API]
+    end
+    
+    WeatherTool --> API
     
     subgraph MCP Gateway Components
         MCPGateway --> Config[Configuration]
         MCPGateway --> Logger[Logger]
         MCPGateway --> Models[MCP Models]
+        MCPGateway --> Dispatcher[Dispatcher Service]
     end
     
     style Client fill:#f9f,stroke:#333,stroke-width:2px
