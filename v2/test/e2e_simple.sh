@@ -1,21 +1,23 @@
 #!/usr/bin/env bash
 
-echo "🧪 Simple End-to-End Test"
-echo "========================"
+echo "🧪 Simple End-to-End Test (v2)"
+echo "==============================="
 
-# Test 1: Health checks
-echo "1. Testing health endpoints..."
-curl -s http://localhost:8001/health | jq .
-curl -s http://localhost:9001/health | jq .
+# Test 1: Health check
+echo "1. Testing MCP Gateway health..."
+curl -s http://localhost:8001/health || echo "❌ Gateway health check failed"
 
-# Test 2: MCP Tools List
-echo -e "\n2. Testing MCP tools list..."
-curl -s -X POST http://localhost:8001/mcp \
-  -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | jq .
+# Test 2: Tool service health checks  
+echo -e "\n2. Testing tool services health..."
+curl -s http://localhost:9001/health | jq . || echo "❌ Weather tool not available"
+curl -s http://localhost:9002/health | jq . || echo "❌ SQL Generator tool not available"
 
-# Test 3: Direct Weather Tool
-echo -e "\n3. Testing weather tool directly..."
+# Test 3: List available tools via FastMCP
+echo -e "\n3. Testing FastMCP tools endpoint..."
+curl -s http://localhost:8001/tools || echo "❌ Tools endpoint not available"
+
+# Test 4: Direct Weather Tool
+echo -e "\n4. Testing weather tool directly..."
 curl -s -X POST http://localhost:9001/v1/get_current_weather \
   -H "Content-Type: application/json" \
   -d '{
@@ -24,18 +26,19 @@ curl -s -X POST http://localhost:9001/v1/get_current_weather \
     "request_id": 1
   }' | jq .
 
-# Test 4: End-to-End via MCP Gateway
-echo -e "\n4. Testing end-to-end via MCP Gateway..."
-curl -s -X POST http://localhost:8001/mcp \
+# Test 5: Direct SQL Generator Tool
+echo -e "\n5. Testing SQL generator tool directly..."
+curl -s -X POST http://localhost:9002/v1/generate_sql_files \
   -H "Content-Type: application/json" \
   -d '{
-    "jsonrpc": "2.0",
-    "id": 1,
-    "method": "tools/call",
-    "params": {
-      "name": "get_current_weather",
-      "arguments": {"location": "Paris", "units": "metric"}
-    }
+    "tool_name": "generate_sql_files", 
+    "arguments": {
+      "streamid": "test_001",
+      "sql_content": "SELECT * FROM users;"
+    },
+    "request_id": 1
   }' | jq .
 
 echo -e "\n✅ Tests completed!"
+echo "💡 Note: This tests direct tool calls. FastMCP uses SSE transport."
+echo "💡 Use Claude Desktop or MCP client to test full FastMCP integration."

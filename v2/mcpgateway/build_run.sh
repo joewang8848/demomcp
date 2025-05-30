@@ -30,3 +30,4 @@ docker-compose up -d
 
 echo "✅ Cleanup, build and run complete."
 echo "🌐 MCP Gateway available at: http://localhost:8001"
+echo "📦 Configuration packaged in image: gateway.yml, tool.yml"
