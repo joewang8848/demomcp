@@ -1,0 +1,12 @@
+# gateway.yml - Gateway Configuration Only
+server:
+  host: 0.0.0.0
+  port: 8001
+  transport: sse
+
+gateway:
+  name: MCP Gateway
+  version: 2.0.0
+
+logging:
+  level: INFO
