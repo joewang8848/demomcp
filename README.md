@@ -31,7 +31,7 @@ graph LR
 
 ### V2 Architecture (Modular MCP Gateway)
 ```mermaid
-mermaidgraph LR
+graph LR
     User[User] --> Client
     subgraph Client
         AI[AI Assistants]
