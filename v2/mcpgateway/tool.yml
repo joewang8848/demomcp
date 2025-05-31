@@ -20,6 +20,26 @@ tools:
       required: [location]
     endpoint: http://192.168.4.154:9001/v1/get_current_weather
 
+  - name: forecast_weather
+    description: Get weather forecast for a location (up to 5 days)
+    input_schema:
+      type: object
+      properties:
+        location: 
+          type: string
+          description: City name or location
+        units:
+          type: string
+          enum: [metric, imperial]
+          default: metric
+          description: Temperature units
+        days:
+          type: string
+          default: "3"
+          description: Number of days to forecast (1-5)
+      required: [location]
+    endpoint: http://192.168.4.154:9001/v1/forecast_weather
+
   - name: generate_sql_files
     description: Generate JIL and SQL files for a given stream ID and SQL content
     input_schema:
