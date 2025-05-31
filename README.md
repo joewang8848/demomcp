@@ -31,31 +31,29 @@ graph LR
 
 ### V2 Architecture (Modular MCP Gateway)
 ```mermaid
-graph LR
+mermaidgraph LR
     User[User] --> Client
-    
     subgraph Client
         AI[AI Assistants]
-        Web[Web Interface]
+        Web[Claude Desktop]
     end
-    
-    Client --> MCPGateway[MCP Gateway]
+    Client --> MCPGateway[MCP Gateway :8001]
     
     subgraph MCPGatewayComponents[MCP Gateway Components]
         MCPGateway --> Config[Configuration]
-        MCPGateway --> Logger[Logger]
-        MCPGateway --> Models[MCP Models]
-        MCPGateway --> Dispatcher[Dispatcher Service]
+        MCPGateway --> Logger[Logger] 
+        MCPGateway --> Models[FastMCP Server]
+        MCPGateway --> Dispatcher[Tool Router]
     end
     
     Dispatcher --> Tools
-    
     subgraph Tools
-        WeatherTool[Weather Tool]
+        WeatherTool[Weather Tool :9001]
+        SQLTool[SQL Generator :9002]
     end
     
     subgraph ExternalServices[External Services]
-        API[Weather API]
+        API[OpenWeather API]
     end
     
     WeatherTool --> API
@@ -67,6 +65,7 @@ graph LR
     style MCPGateway fill:#bbdefb,stroke:#333,stroke-width:2px
     style Dispatcher fill:#ffcdd2,stroke:#333,stroke-width:2px
     style WeatherTool fill:#bbdefb,stroke:#333,stroke-width:2px
+    style SQLTool fill:#bbdefb,stroke:#333,stroke-width:2px
     style API fill:#f3e5f5,stroke:#333,stroke-width:2px
     style Config fill:#ffcdd2,stroke:#333,stroke-width:2px
     style Logger fill:#ffcdd2,stroke:#333,stroke-width:2px
