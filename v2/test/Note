@@ -1,15 +1,13 @@
 import asyncio
-from mcp import ClientSession
-from mcp.client.streamable_http import streamablehttp_client
+from fastmcp import Client
 
-async def list_tools_http(server_url: str):
-    async with streamablehttp_client(server_url) as (read_stream, write_stream, _):
-        async with ClientSession(read_stream, write_stream) as session:
-            await session.initialize()
-            resp = await session.list_tools()
-            for tool in resp.tools:
-                print(f"{tool.name}: {tool.description}")
+async def main():
+    # Client automatically uses StreamableHttpTransport for HTTP URLs
+    client = Client("http://localhost:8000/mcp")
+    async with client:
+        tools = await client.list_tools()
+        for t in tools:
+            print(f"{t.name}: {t.description}")
 
 if __name__ == "__main__":
-    # e.g. "http://localhost:8000/mcp"
-    asyncio.run(list_tools_http("http://localhost:8000/mcp"))
+    asyncio.run(main())
