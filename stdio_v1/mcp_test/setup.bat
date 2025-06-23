@@ -46,7 +46,7 @@ echo 1. Test the server:
 echo    .venv\Scripts\activate.bat
 echo    python mcp_server.py
 echo.
-echo 2. Copy this JSON to your Claude Desktop config:
+echo 2. Copy this JSON to your AI Assistant config:
 echo.
 echo {
 echo   "mcpServers": {
