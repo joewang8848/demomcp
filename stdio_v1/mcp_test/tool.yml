@@ -1,0 +1,19 @@
+# tool.yml - Tool Configuration for stdio MCP Server
+# This file defines all available tools and their local app.py files
+
+tools:
+  - name: hello_test
+    description: Simple hello greeting test tool
+    app_path: "tools/hellotest/app.py"
+    function_name: "hello_function"
+    input_schema:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the person to greet
+        message:
+          type: string
+          default: "Hello"
+          description: Custom greeting message
+      required: [name]
