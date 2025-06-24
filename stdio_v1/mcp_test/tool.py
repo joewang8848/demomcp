@@ -1,11 +1,10 @@
-# tool.py - Dynamic Tool Management for stdio MCP Server
+# tool.py - Simple Tool Management (Standard Registration Only)
 import yaml
 import logging
 import importlib.util
-import sys
-from pathlib import Path
-from typing import Dict, Any, Optional
 import inspect
+from pathlib import Path
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 
@@ -13,153 +12,162 @@ def load_tool_config():
     """Load tool configuration from tool.yml"""
     try:
         with open("tool.yml", 'r') as f:
-            config = yaml.safe_load(f)
-            tools = config.get("tools", [])
+            tools = yaml.safe_load(f).get("tools", [])
             logger.info(f"Loaded {len(tools)} tools from tool.yml")
             return tools
-    except FileNotFoundError:
-        logger.error("tool.yml file not found")
-        return []
     except Exception as e:
         logger.error(f"Failed to load tool config: {e}")
         return []
 
-def load_tool_module(app_path: str):
-    """Dynamically import a tool module from app.py path"""
+def load_tool_module(app_path: str, tool_name: str):
+    """Load a tool module dynamically"""
+    app_file = Path(app_path)
+    if not app_file.exists():
+        raise FileNotFoundError(f"Tool app file not found: {app_path}")
+    
+    module_name = f"tool_{tool_name}_{abs(hash(str(app_file)))}"
+    spec = importlib.util.spec_from_file_location(module_name, app_file)
+    
+    if not spec or not spec.loader:
+        raise ImportError(f"Could not load module spec from {app_path}")
+    
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    
+    logger.info(f"Loaded module for tool: {tool_name}")
+    return module
+
+def create_tool_function(tool_config: Dict[str, Any], mcp) -> bool:
+    """Create and register a dynamic tool function"""
+    name = tool_config["name"]
+    base_description = tool_config["description"]
+    app_path = tool_config["app_path"]
+    function_name = tool_config.get("function_name", name)
+    schema = tool_config.get("input_schema", {})
+    
     try:
-        app_file = Path(app_path)
-        if not app_file.exists():
-            raise FileNotFoundError(f"Tool app file not found: {app_path}")
+        # Load module and get function
+        module = load_tool_module(app_path, name)
         
-        # Create unique module name to avoid conflicts
-        module_name = f"tool_module_{app_file.stem}_{abs(hash(str(app_file)))}"
+        if not hasattr(module, function_name):
+            available = [attr for attr in dir(module) if callable(getattr(module, attr)) and not attr.startswith('_')]
+            logger.error(f"Function '{function_name}' not found. Available: {available}")
+            return False
         
-        # Create module spec and load module
-        spec = importlib.util.spec_from_file_location(module_name, app_file)
-        if spec is None or spec.loader is None:
-            raise ImportError(f"Could not load module spec from {app_path}")
+        original_function = getattr(module, function_name)
+        properties = schema.get("properties", {})
+        required = schema.get("required", [])
         
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        # Build comprehensive description with parameter information
+        description_parts = [base_description]
         
-        return module
-    except Exception as e:
-        logger.error(f"Failed to load tool module from {app_path}: {e}")
-        raise
-
-class ToolWrapper:
-    """Wrapper class to hold tool information and execute tool functions"""
-    
-    def __init__(self, tool_config: Dict[str, Any]):
-        self.name = tool_config["name"]
-        self.description = tool_config["description"]
-        self.app_path = tool_config["app_path"]
-        self.function_name = tool_config.get("function_name", self.name)
-        self.schema = tool_config.get("input_schema", {})
-        self.module = None
-        
-        # Load the module immediately
-        try:
-            self.module = load_tool_module(self.app_path)
-            logger.info(f"✅ Loaded module for tool: {self.name}")
-        except Exception as e:
-            logger.error(f"❌ Failed to load module for tool {self.name}: {e}")
-            raise
-    
-    async def execute(self, **kwargs) -> str:
-        """Execute the tool function with given arguments"""
-        try:
-            if self.module is None:
-                return f"Error: Module not loaded for tool {self.name}"
-            
-            if not hasattr(self.module, self.function_name):
-                return f"Error: Function '{self.function_name}' not found in {self.app_path}"
-            
-            tool_function = getattr(self.module, self.function_name)
-            
-            if not callable(tool_function):
-                return f"Error: '{self.function_name}' is not callable"
-            
-            # Execute function (handle both sync and async)
-            if inspect.iscoroutinefunction(tool_function):
-                result = await tool_function(**kwargs)
-            else:
-                result = tool_function(**kwargs)
+        if properties:
+            description_parts.append("\nParameters:")
+            for prop_name, prop_def in properties.items():
+                param_desc = prop_def.get("description", f"{prop_name} parameter")
+                is_required = prop_name in required
+                default_value = prop_def.get("default")
                 
-            return str(result)
-            
-        except Exception as e:
-            logger.error(f"Error executing tool {self.name}: {e}")
-            return f"Error executing {self.name}: {str(e)}"
-
-# Global registry of tool wrappers
-_tool_registry = {}
+                param_info = f"• {prop_name}: {param_desc}"
+                if is_required:
+                    param_info += " (required)"
+                elif default_value is not None:
+                    param_info += f" (default: '{default_value}')"
+                else:
+                    param_info += " (optional)"
+                    
+                description_parts.append(param_info)
+        
+        # Combine into comprehensive description
+        comprehensive_description = "\n".join(description_parts)
+        
+        # Build function signature
+        params = []
+        param_names = list(properties.keys())
+        
+        for prop_name, prop_def in properties.items():
+            if prop_name in required:
+                params.append(f"{prop_name}: str")
+            else:
+                default_value = prop_def.get("default", "")
+                if isinstance(default_value, str):
+                    params.append(f'{prop_name}: str = "{default_value}"')
+                else:
+                    params.append(f"{prop_name}: str = '{default_value}'")
+        
+        param_signature = ", ".join(params)
+        
+        # Create function with comprehensive description
+        function_code = f'''
+async def {name}({param_signature}) -> str:
+    """{comprehensive_description}"""
+    try:
+        args = {{{", ".join([f'"{p}": {p}' for p in param_names])}}}
+        
+        # Validate required parameters
+        for req in {required}:
+            if not args.get(req):
+                return f"Error: Required parameter '{{req}}' is missing"
+        
+        # Call original function
+        if inspect.iscoroutinefunction(original_function):
+            result = await original_function(**args)
+        else:
+            result = original_function(**args)
+        
+        logger.info(f"Tool {name} executed successfully")
+        return str(result)
+        
+    except Exception as e:
+        logger.error(f"Tool {name} error: {{e}}")
+        return f"Error: {{str(e)}}"
+'''
+        
+        # Execute and register with standard method only
+        namespace = {
+            'original_function': original_function,
+            'required': required,
+            'param_names': param_names,
+            'logger': logger,
+            'inspect': inspect
+        }
+        
+        exec(function_code, namespace)
+        tool_function = namespace[name]
+        tool_function.__name__ = name
+        
+        # Standard registration - simple and reliable
+        mcp.tool()(tool_function)
+        
+        logger.info(f"Registered tool: {name}")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Failed to create tool {name}: {e}")
+        return False
 
 def register_all_tools(mcp) -> int:
-    """Register all tools with the MCP server"""
-    global _tool_registry
+    """Register all tools from configuration"""
+    logger.info("Starting tool registration")
     
     tools = load_tool_config()
+    if not tools:
+        return 0
+    
     count = 0
+    required_fields = ["name", "description", "app_path"]
     
     for tool_config in tools:
-        try:
-            # Validate required fields
-            if "app_path" not in tool_config:
-                logger.error(f"Tool {tool_config.get('name', 'unknown')} missing app_path")
-                continue
-            
-            # Create tool wrapper
-            tool_wrapper = ToolWrapper(tool_config)
-            _tool_registry[tool_wrapper.name] = tool_wrapper
-            
-            # Create the actual tool function for FastMCP
-            def make_tool_function(wrapper):
-                # Build the function signature dynamically
-                properties = wrapper.schema.get("properties", {})
-                required = wrapper.schema.get("required", [])
-                
-                # Create parameter list
-                params = []
-                for prop_name, prop_def in properties.items():
-                    if prop_name in required:
-                        params.append(f"{prop_name}: str")
-                    else:
-                        default = prop_def.get("default", '""')
-                        if isinstance(default, str):
-                            default = f'"{default}"'
-                        params.append(f"{prop_name}: str = {default}")
-                
-                # Create function dynamically
-                param_str = ", ".join(params)
-                param_names = list(properties.keys())
-                
-                async def tool_function(**kwargs) -> str:
-                    # Filter kwargs to only include expected parameters
-                    filtered_kwargs = {k: v for k, v in kwargs.items() if k in param_names}
-                    return await wrapper.execute(**filtered_kwargs)
-                
-                # Set function metadata
-                tool_function.__name__ = wrapper.name
-                tool_function.__doc__ = wrapper.description
-                
-                # Create proper annotations
-                annotations = {}
-                for prop_name in properties.keys():
-                    annotations[prop_name] = str
-                annotations['return'] = str
-                tool_function.__annotations__ = annotations
-                
-                return tool_function
-            
-            # Register with MCP
-            tool_func = make_tool_function(tool_wrapper)
-            mcp.tool()(tool_func)
-            
-            logger.info(f"✅ Registered tool: {tool_wrapper.name} -> {tool_wrapper.app_path}")
+        name = tool_config.get("name", "unknown")
+        
+        # Validate required fields
+        missing = [field for field in required_fields if not tool_config.get(field)]
+        if missing:
+            logger.error(f"Tool {name} missing fields: {missing}")
+            continue
+        
+        if create_tool_function(tool_config, mcp):
             count += 1
-            
-        except Exception as e:
-            logger.error(f"❌ Failed to register {tool_config.get('name', 'unknown')}: {e}")
     
+    logger.info(f"Registration complete: {count}/{len(tools)} tools")
     return count

@@ -52,7 +52,7 @@ echo {
 echo   "mcpServers": {
 echo     "mcp-test": {
 echo       "command": "%ESCAPED_DIR%\\.venv\\Scripts\\python.exe",
-echo       "args": ["%ESCAPED_DIR%\\mcp_server.py"],
+echo       "args": ["mcp_server.py"],
 echo       "cwd": "%ESCAPED_DIR%",
 echo       "autoApprove": [],
 echo       "disabled": false,

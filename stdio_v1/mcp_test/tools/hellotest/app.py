@@ -1,8 +1,11 @@
 # tools/hellotest/app.py - Hello Test Tool
-"""
-Simple hello greeting tool implementation
-"""
+import sys
+from pathlib import Path
 
+# Add current directory to Python path
+sys.path.insert(0, str(Path(__file__).parent))
+
+from user import User
 def hello_function(name: str, message: str = "Hello") -> str:
     """
     Generate a greeting message
@@ -17,9 +20,8 @@ def hello_function(name: str, message: str = "Hello") -> str:
     if not name:
         return "Error: Name is required"
     
-    return f"{message}, {name}! 👋 Welcome to the MCP server!"
+    #return f"{message}, {name}! 👋 Welcome to the MCP server!"
+    user = User(name)
+    return user.hello(message)
 
-# You can add more functions here that can be called from tool.yml
-def goodbye_function(name: str) -> str:
-    """Say goodbye to someone"""
-    return f"Goodbye, {name}! Thanks for using the MCP server! 👋"
+
